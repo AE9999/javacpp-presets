@@ -1,0 +1,149 @@
+diff --git a/minisat/core/Solver.cc b/minisat/core/Solver.cc
+index 0b4f77a..532e1b7 100644
+--- a/minisat/core/Solver.cc
++++ b/minisat/core/Solver.cc
+@@ -19,12 +19,14 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ **************************************************************************************************/
+ 
+ #include <math.h>
++#include <fstream>
+ 
+ #include "minisat/mtl/Alg.h"
+ #include "minisat/mtl/Sort.h"
+ #include "minisat/utils/System.h"
+ #include "minisat/core/Solver.h"
+ 
++
+ using namespace Minisat;
+ 
+ //=================================================================================================
+@@ -736,11 +738,17 @@ lbool Solver::search(int nof_conflicts)
+                 learntsize_adjust_cnt    = (int)learntsize_adjust_confl;
+                 max_learnts             *= learntsize_inc;
+ 
+-                if (verbosity >= 1)
+-                    printf("| %9d | %7d %8d %8d | %8d %8d %6.0f | %6.3f %% |\n", 
+-                           (int)conflicts, 
+-                           (int)dec_vars - (trail_lim.size() == 0 ? trail.size() : trail_lim[0]), nClauses(), (int)clauses_literals, 
+-                           (int)max_learnts, nLearnts(), (double)learnts_literals/nLearnts(), progressEstimate()*100);
++                if (verbosity >= 1) {
++                  std::ofstream outfile;
++                  outfile.open("/tmp/sat.log", std::ios_base::app);
++                  char buf[1000];
++                  sprintf(buf, "| %9d | %7d %8d %8d | %8d %8d %6.0f | %6.3f %% |\n",
++                       (int)conflicts,
++                       (int)dec_vars - (trail_lim.size() == 0 ? trail.size() : trail_lim[0]), nClauses(), (int)clauses_literals,
++                       (int)max_learnts, nLearnts(), (double)learnts_literals/nLearnts(), progressEstimate()*100);
++                  outfile << buf;
++                  outfile.close();
++                }
+             }
+ 
+         }else{
+@@ -853,10 +861,14 @@ lbool Solver::solve_()
+     lbool   status            = l_Undef;
+ 
+     if (verbosity >= 1){
+-        printf("============================[ Search Statistics ]==============================\n");
+-        printf("| Conflicts |          ORIGINAL         |          LEARNT          | Progress |\n");
+-        printf("|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |\n");
+-        printf("===============================================================================\n");
++        std::ofstream outfile;
++        outfile.open("/tmp/sat.log", std::ios_base::app);
++
++        outfile << ("============================[ Search Statistics ]==============================\n");
++        outfile << ("| Conflicts |          ORIGINAL         |          LEARNT          | Progress |\n");
++        outfile << ("|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |\n");
++        outfile << ("===============================================================================\n");
++        outfile.close();
+     }
+ 
+     // Search:
+@@ -868,8 +880,20 @@ lbool Solver::solve_()
+         curr_restarts++;
+     }
+ 
+-    if (verbosity >= 1)
+-        printf("===============================================================================\n");
++    if (verbosity >= 1) {
++        std::ofstream outfile;
++        outfile.open("/tmp/sat.log", std::ios_base::app);
++        outfile << ("===============================================================================\n");
++        if (status == l_True) {
++            outfile << "SAT\n";
++        }  else if (status == l_False) {
++            outfile << "UNSAT\n";
++        } else {
++            outfile << "NEED MORE TIME\n";
++        }
++        outfile.close();
++        printStats();
++    }
+ 
+ 
+     if (status == l_True){
+@@ -992,13 +1016,27 @@ void Solver::printStats() const
+ {
+     double cpu_time = cpuTime();
+     double mem_used = memUsedPeak();
+-    printf("restarts              : %"PRIu64"\n", starts);
+-    printf("conflicts             : %-12"PRIu64"   (%.0f /sec)\n", conflicts   , conflicts   /cpu_time);
+-    printf("decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", decisions, (float)rnd_decisions*100 / (float)decisions, decisions   /cpu_time);
+-    printf("propagations          : %-12"PRIu64"   (%.0f /sec)\n", propagations, propagations/cpu_time);
+-    printf("conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", tot_literals, (max_literals - tot_literals)*100 / (double)max_literals);
+-    if (mem_used != 0) printf("Memory used           : %.2f MB\n", mem_used);
+-    printf("CPU time              : %g s\n", cpu_time);
++    std::ofstream outfile;
++    outfile.open("/tmp/sat.log", std::ios_base::app);
++    char buf[1000];
++
++    sprintf(buf, "restarts              : %"PRIu64"\n", starts);
++    outfile << buf;
++    sprintf(buf, "conflicts             : %-12"PRIu64"   (%.0f /sec)\n", conflicts   , conflicts   /cpu_time);
++    outfile << buf;
++    sprintf(buf, "decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", decisions, (float)rnd_decisions*100 / (float)decisions, decisions   /cpu_time);
++    outfile << buf;
++    sprintf(buf, "propagations          : %-12"PRIu64"   (%.0f /sec)\n", propagations, propagations/cpu_time);
++    outfile << buf;
++    sprintf(buf, "conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", tot_literals, (max_literals - tot_literals)*100 / (double)max_literals);
++    outfile << buf;
++    if (mem_used != 0) {
++        printf("Memory used           : %.2f MB\n", mem_used);
++        outfile << buf;
++    }
++    sprintf(buf, "CPU time              : %g s\n", cpu_time);
++    outfile << buf;
++    outfile.close();
+ }
+ 
+ 
+diff --git a/minisat/core/SolverTypes.h b/minisat/core/SolverTypes.h
+index 89986d1..91d6f58 100644
+--- a/minisat/core/SolverTypes.h
++++ b/minisat/core/SolverTypes.h
+@@ -121,9 +121,9 @@ inline int   toInt  (lbool l) { return l.value; }
+ inline lbool toLbool(int   v) { return lbool((uint8_t)v);  }
+ 
+ #if defined(MINISAT_CONSTANTS_AS_MACROS)
+-  #define l_True  (lbool((uint8_t)0)) // gcc does not do constant propagation if these are real constants.
+-  #define l_False (lbool((uint8_t)1))
+-  #define l_Undef (lbool((uint8_t)2))
++  #define l_True  (Minisat::lbool((uint8_t)0)) // gcc does not do constant propagation if these are real constants.
++  #define l_False (Minisat::lbool((uint8_t)1))
++  #define l_Undef (Minisat::lbool((uint8_t)2))
+ #else
+   const lbool l_True ((uint8_t)0);
+   const lbool l_False((uint8_t)1);
+diff --git a/minisat/mtl/Vec.h b/minisat/mtl/Vec.h
+index 5c188ff..9b034ba 100644
+--- a/minisat/mtl/Vec.h
++++ b/minisat/mtl/Vec.h
+@@ -39,7 +39,7 @@ template<class T, class _Size = int>
+ class vec {
+ public:
+     typedef _Size Size;
+-private:
++public:
+     T*   data;
+     Size sz;
+     Size cap;
