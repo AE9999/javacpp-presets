@@ -36,18 +36,9 @@ public class glucose implements InfoMapper {
                .put(new Info("Glucose::IntSet<Glucose::Lit,Glucose::MkIndexLit>").cast().pointerTypes("LitMkIndexLitSet").define())
                .put(new Info("Glucose::Clone").pointerTypes("ClonePointer").define())
                .put(new Info("Glucose::vec<Glucose::Lit>").pointerTypes("LitVecPointer").define())
-               .put(new Info("Glucose::vec<Glucose::Var,int>",
-                             "Glucose::vec<int,int>",
-                             "vec<Glucose::Var>",
-                             "Glucose::vec<Var,int>",
-                             "vec<Var, int>").pointerTypes("VarVecPointer").define())
-               .put(new Info("Glucose::vec<Glucose::lbool,int>",
-                        "Glucose::vec<Glucose::lbool>",
-                        "Glucose::vec<lbool,int>",
-                        "Glucose::vec<lbool>").pointerTypes("LboolVecPointer").define())
-               .put(new Info("Glucose::RegionAllocator<uint32_t>::Ref",
-                        "RegionAllocator<uint32_t>::Ref",
-                        "Ref").cast().valueTypes("long").pointerTypes("long").define())
+               .put(new Info("Glucose::vec<Glucose::Var>").pointerTypes("VarVecPointer").define())
+               .put(new Info("Glucose::vec<Glucose::lbool>").pointerTypes("LboolVecPointer").define())
+               .put(new Info("Glucose::RegionAllocator<uint32_t>::Ref").cast().valueTypes("long").pointerTypes("long").define())
                .put(new Info("Glucose::RegionAllocator<uint32_t>").pointerTypes("RegionAllocatorPointer"))
                .put(new Info("Glucose::ClauseAllocator", "::Glucose::ClauseAllocator").skip())
                .put(new Info("Glucose::ClauseIterator", "::Glucose::ClauseIterator").skip())
