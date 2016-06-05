@@ -44,6 +44,9 @@ public class glucose implements InfoMapper {
                .put(new Info("Glucose::ClauseIterator", "::Glucose::ClauseIterator").skip())
                .put(new Info("Glucose::ClauseAllocator::").skip())
                .put(new Info("Glucose::Solver::reduceDB").skip())
+               .put(new Info("Glucose::vec<Glucose::lbool>::capacity").skip())
+               .put(new Info("Glucose::vec<Glucose::Var>::capacity").skip())
+                .put(new Info("Glucose::vec<Glucose::Lit>::capacity").skip())
                .put(new Info("Glucose::reduceDB_lt").skip())
                .put(new Info("Glucose::Clause", "::Glucose::Clause").skip())
         ;
