@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 375dbc8..a423633 100644
+index 375dbc8..127cf24 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -48,3 +48,12 @@ target_link_libraries(glucose-simp glucose)
@@ -13,6 +13,18 @@ index 375dbc8..a423633 100644
 +        ARCHIVE DESTINATION lib)
 +
 +install(DIRECTORY mtl utils core simp
-+        DESTINATION include/glucose
++        DESTINATION include/
 +        FILES_MATCHING PATTERN "*.h")
 \ No newline at end of file
+diff --git a/mtl/Vec.h b/mtl/Vec.h
+index 954eef7..3d734ec 100644
+--- a/mtl/Vec.h
++++ b/mtl/Vec.h
+@@ -41,6 +41,7 @@ class vec {
+     int sz;
+     int cap;
+ 
++public: // Yeah JNI doesn't work otherwise
+     // Don't allow copying (error prone):
+     vec<T>&  operator = (vec<T>& other) { assert(0); return *this; }
+              vec        (vec<T>& other) { assert(0); }
