@@ -16,7 +16,8 @@ import org.bytedeco.javacpp.tools.*;
                                                 "minisat/mtl/Vec.h",
                                                 "minisat/mtl/IntMap.h",
                                                 "minisat/core/SolverTypes.h",
-                                                "minisat/core/Solver.h"
+                                                "minisat/core/Solver.h",
+                                                "minisat/simp/SimpSolver.h"
                                              },
                                    link    = { "minisat" }
                                  )

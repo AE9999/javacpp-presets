@@ -901,4 +901,157 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 // #endif
 
 
+// Parsed from minisat/simp/SimpSolver.h
+
+/************************************************************************************[SimpSolver.h]
+Copyright (c) 2006,      Niklas Een, Niklas Sorensson
+Copyright (c) 2007-2010, Niklas Sorensson
+<p>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+<p>
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+<p>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**************************************************************************************************/
+
+// #ifndef Minisat_SimpSolver_h
+// #define Minisat_SimpSolver_h
+
+// #include "minisat/mtl/Queue.h"
+// #include "minisat/core/Solver.h"
+
+//=================================================================================================
+
+
+@Namespace("Minisat") @NoOffset public static class SimpSolver extends Solver {
+    static { Loader.load(); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public SimpSolver(Pointer p) { super(p); }
+    /** Native array allocator. Access with {@link Pointer#position(long)}. */
+    public SimpSolver(long size) { super((Pointer)null); allocateArray(size); }
+    private native void allocateArray(long size);
+    @Override public SimpSolver position(long position) {
+        return (SimpSolver)super.position(position);
+    }
+
+    // Constructor/Destructor:
+    //
+    public SimpSolver() { super((Pointer)null); allocate(); }
+    private native void allocate();
+
+    // Problem specification:
+    //
+    public native @Cast("Minisat::Var") int newVar(@ByVal(nullValue = "l_Undef") lbool upol/*=l_Undef*/, @Cast("bool") boolean dvar/*=true*/);
+    public native @Cast("Minisat::Var") int newVar();
+    public native void releaseVar(@ByVal Lit l);
+    public native @Cast("bool") boolean addClause(@Const @ByRef LitVecPointer ps);
+    public native @Cast("bool") boolean addEmptyClause();                // Add the empty clause to the solver.
+    public native @Cast("bool") boolean addClause(@ByVal Lit p);               // Add a unit clause to the solver.
+    public native @Cast("bool") boolean addClause(@ByVal Lit p, @ByVal Lit q);        // Add a binary clause to the solver.
+    public native @Cast("bool") boolean addClause(@ByVal Lit p, @ByVal Lit q, @ByVal Lit r); // Add a ternary clause to the solver.
+    public native @Cast("bool") boolean addClause(@ByVal Lit p, @ByVal Lit q, @ByVal Lit r, @ByVal Lit s); // Add a quaternary clause to the solver. 
+    public native @Cast("bool") boolean addClause_(      @ByRef LitVecPointer ps);
+    public native @Cast("bool") boolean substitute(@Cast("Minisat::Var") int v, @ByVal Lit x);  // Replace all occurences of v with x (may cause a contradiction).
+
+    // Variable mode:
+    // 
+    public native void setFrozen(@Cast("Minisat::Var") int v, @Cast("bool") boolean b); // If a variable is frozen it will not be eliminated.
+    public native @Cast("bool") boolean isEliminated(@Cast("Minisat::Var") int v);
+
+    // Alternative freeze interface (may replace 'setFrozen()'):
+    public native void freezeVar(@Cast("Minisat::Var") int v);         // Freeze one variable so it will not be eliminated.
+    public native void thaw();              // Thaw all frozen variables.
+
+
+    // Solving:
+    //
+    public native @Cast("bool") boolean solve(@Const @ByRef LitVecPointer assumps, @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @Cast("bool") boolean solve(@Const @ByRef LitVecPointer assumps);
+    public native @ByVal lbool solveLimited(@Const @ByRef LitVecPointer assumps, @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @ByVal lbool solveLimited(@Const @ByRef LitVecPointer assumps);
+    public native @Cast("bool") boolean solve(                     @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @Cast("bool") boolean solve();
+    public native @Cast("bool") boolean solve(@ByVal Lit p,        @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @Cast("bool") boolean solve(@ByVal Lit p);       
+    public native @Cast("bool") boolean solve(@ByVal Lit p, @ByVal Lit q,        @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @Cast("bool") boolean solve(@ByVal Lit p, @ByVal Lit q);
+    public native @Cast("bool") boolean solve(@ByVal Lit p, @ByVal Lit q, @ByVal Lit r, @Cast("bool") boolean do_simp/*=true*/, @Cast("bool") boolean turn_off_simp/*=false*/);
+    public native @Cast("bool") boolean solve(@ByVal Lit p, @ByVal Lit q, @ByVal Lit r);
+    public native @Cast("bool") boolean eliminate(@Cast("bool") boolean turn_off_elim/*=false*/);
+    public native @Cast("bool") boolean eliminate();  // Perform variable elimination based simplification. 
+
+    // Memory managment:
+    //
+    public native void garbageCollect();
+
+
+    // Generate a (possibly simplified) DIMACS file:
+    //
+// #if 0
+// #endif
+
+    // Mode of operation:
+    //
+    public native int grow(); public native SimpSolver grow(int grow);              // Allow a variable elimination step to grow by a number of clauses (default to zero).
+    public native int clause_lim(); public native SimpSolver clause_lim(int clause_lim);        // Variables are not eliminated if it produces a resolvent with a length above this limit.
+                               // -1 means no limit.
+    public native int subsumption_lim(); public native SimpSolver subsumption_lim(int subsumption_lim);   // Do not check if subsumption against a clause larger than this. -1 means no limit.
+    public native double simp_garbage_frac(); public native SimpSolver simp_garbage_frac(double simp_garbage_frac); // A different limit for when to issue a GC during simplification (Also see 'garbage_frac').
+
+    public native @Cast("bool") boolean use_asymm(); public native SimpSolver use_asymm(boolean use_asymm);         // Shrink clauses by asymmetric branching.
+    public native @Cast("bool") boolean use_rcheck(); public native SimpSolver use_rcheck(boolean use_rcheck);        // Check if a clause is already implied. Prett costly, and subsumes subsumptions :)
+    public native @Cast("bool") boolean use_elim(); public native SimpSolver use_elim(boolean use_elim);          // Perform variable elimination.
+    public native @Cast("bool") boolean extend_model(); public native SimpSolver extend_model(boolean extend_model);      // Flag to indicate whether the user needs to look at the full model.
+
+    // Statistics:
+    //
+    public native int merges(); public native SimpSolver merges(int merges);
+    public native int asymm_lits(); public native SimpSolver asymm_lits(int asymm_lits);
+    public native int eliminated_vars(); public native SimpSolver eliminated_vars(int eliminated_vars);
+}
+
+
+//=================================================================================================
+// Implementation of inline methods:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//=================================================================================================
+
+
+// #endif
+
+
 }
