@@ -52,9 +52,9 @@ public class minisat implements InfoMapper {
                              "Ref").cast().valueTypes("long").pointerTypes("long").define())
                .put(new Info("Minisat::RegionAllocator<uint32_t>").pointerTypes("RegionAllocatorPointer"))
                .put(new Info("Minisat::ClauseAllocator", "::Minisat::ClauseAllocator").skip())
-               .put(new Info("Minisat::ClauseIterator", "::Minisat::ClauseIterator").skip())
-               .put(new Info("Minisat::ClauseAllocator::").skip())
-               .put(new Info("Minisat::Clause", "::Minisat::Clause").skip())
+               .put(new Info("Minisat::ClauseIterator").skip())
+               .put(new Info("Minisat::ClauseAllocator").skip())
+               .put(new Info("Minisat::Clause").skip())
         ;
     }
 }
