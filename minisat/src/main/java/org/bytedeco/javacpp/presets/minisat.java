@@ -55,6 +55,7 @@ public class minisat implements InfoMapper {
                 )
                .put(new Info("Minisat::ClauseAllocator").pointerTypes("ClauseAllocatorPointer").define())
                .put(new Info("Minisat::ClauseAllocator::Unit_Size").javaNames("ClauseAllocatorUnitSize"))
+               .put(new Info("Minisat::ClauseAllocator::reloc").skip())
 
                .put(new Info("Minisat::ClauseIterator").skip())
                .put(new Info("Minisat::Clause").skip())
