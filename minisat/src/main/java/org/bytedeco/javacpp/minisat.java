@@ -577,14 +577,103 @@ public static final int var_Undef = (-1);
 //=================================================================================================
 // Clause -- a simple class for representing a clause:
 
+@Namespace("Minisat") public static class Clause extends Pointer {
+    static { Loader.load(); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public Clause(Pointer p) { super(p); }
+
+    public native void calcAbstraction();
+
+
+    public native int size();
+    public native void shrink(int i);
+    public native void pop();
+    public native @Cast("bool") boolean learnt();
+    public native @Cast("bool") boolean has_extra();
+    
+    
+    public native @Const @ByRef Lit last();
+
+    public native @Cast("bool") boolean reloced();
+    public native @Cast("Minisat::CRef") long relocation();
+    public native void relocate(@Cast("Minisat::CRef") long c);
+
+    // NOTE: somewhat unsafe to change the clause in-place! Must manually call 'calcAbstraction' afterwards for
+    //       subsumption operations to behave correctly.
+    public native @ByRef @Name("operator []") Lit get(int i);
+    public native @Const @Name("operator const Minisat::Lit*") Lit asLit();
+
+    public native @ByRef FloatPointer activity();
+    public native @Cast("uint32_t") int abstraction();
+
+    public native @ByVal Lit subsumes(@Const @ByRef Clause other);
+    public native void strengthen(@ByVal Lit p);
+}
+
 
 //=================================================================================================
 // ClauseAllocator -- a simple class for allocating memory for clauses:
 
 @Namespace("Minisat") @MemberGetter public static native @Cast("const Minisat::CRef") long CRef_Undef();
+@Name("Minisat::ClauseAllocator") @NoOffset public static class ClauseAllocatorPointer extends Pointer {
+    static { Loader.load(); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public ClauseAllocatorPointer(Pointer p) { super(p); }
+    /** Native array allocator. Access with {@link Pointer#position(long)}. */
+    public ClauseAllocatorPointer(long size) { super((Pointer)null); allocateArray(size); }
+    private native void allocateArray(long size);
+    @Override public ClauseAllocatorPointer position(long position) {
+        return (ClauseAllocatorPointer)super.position(position);
+    }
+
+    /** enum Minisat::ClauseAllocator:: */
+    public static final int ClauseAllocatorUnitSize =RegionAllocatorPointer.Unit_Size;
+
+    public native @Cast("bool") boolean extra_clause_field(); public native ClauseAllocatorPointer extra_clause_field(boolean extra_clause_field);
+
+    public ClauseAllocatorPointer(@Cast("uint32_t") int start_cap) { super((Pointer)null); allocate(start_cap); }
+    private native void allocate(@Cast("uint32_t") int start_cap);
+    public ClauseAllocatorPointer() { super((Pointer)null); allocate(); }
+    private native void allocate();
+
+    public native void moveTo(@ByRef ClauseAllocatorPointer to);
+
+    public native @Cast("Minisat::CRef") long alloc(@Const @ByRef LitVecPointer ps, @Cast("bool") boolean learnt/*=false*/);
+    public native @Cast("Minisat::CRef") long alloc(@Const @ByRef LitVecPointer ps);
+
+    public native @Cast("Minisat::CRef") long alloc(@Const @ByRef Clause from);
+
+    public native @Cast("uint32_t") int size();
+    public native @Cast("uint32_t") int wasted();
+
+    // Deref, Load Effective Address (LEA), Inverse of LEA (AEL):
+    public native @ByRef @Name("operator []") Clause get(@Cast("Minisat::CRef") long r);
+    public native Clause lea(@Cast("Minisat::CRef") long r);
+    public native @Cast("Minisat::CRef") long ael(@Const Clause t);
+
+    public native void free(@Cast("Minisat::CRef") long cid);
+
+    
+}
 
 //=================================================================================================
 // Simple iterator classes (for iterating over clauses and top-level assignments):
+
+@Namespace("Minisat") @NoOffset public static class ClauseIterator extends Pointer {
+    static { Loader.load(); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public ClauseIterator(Pointer p) { super(p); }
+
+    public ClauseIterator(@Const @ByRef ClauseAllocatorPointer _ca, @Cast("const Minisat::CRef*") long _crefs) { super((Pointer)null); allocate(_ca, _crefs); }
+    private native void allocate(@Const @ByRef ClauseAllocatorPointer _ca, @Cast("const Minisat::CRef*") long _crefs);
+
+    public native @Name("operator ++") void increment();
+    public native @Const @ByRef @Name("operator *") Clause multiply();
+
+    // NOTE: does not compare that references use the same clause-allocator:
+    public native @Cast("bool") @Name("operator ==") boolean equals(@Const @ByRef ClauseIterator ci);
+    public native @Cast("bool") @Name("operator !=") boolean notEquals(@Const @ByRef ClauseIterator ci);
+}
 
 
 @Namespace("Minisat") @NoOffset public static class TrailIterator extends Pointer {
@@ -721,12 +810,17 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
     public native @Cast("bool") boolean implies(@Const @ByRef LitVecPointer assumps, @ByRef LitVecPointer out);
 
     // Iterate over clauses and top-level assignments:
+    public native @ByVal ClauseIterator clausesBegin();
+    public native @ByVal ClauseIterator clausesEnd();
     public native @ByVal TrailIterator trailBegin();
     public native @ByVal TrailIterator trailEnd();
 
     public native void toDimacs(@Cast("FILE*") Pointer f, @Const @ByRef LitVecPointer assumps);            // Write CNF to file in DIMACS-format.
     public native void toDimacs(@Cast("const char*") BytePointer file, @Const @ByRef LitVecPointer assumps);
     public native void toDimacs(String file, @Const @ByRef LitVecPointer assumps);
+    public native void toDimacs(@Cast("FILE*") Pointer f, @ByRef Clause c, @ByRef VarVecPointer map, @Cast("Minisat::Var*") @ByRef IntPointer max);
+    public native void toDimacs(@Cast("FILE*") Pointer f, @ByRef Clause c, @ByRef VarVecPointer map, @Cast("Minisat::Var*") @ByRef IntBuffer max);
+    public native void toDimacs(@Cast("FILE*") Pointer f, @ByRef Clause c, @ByRef VarVecPointer map, @Cast("Minisat::Var*") @ByRef int[] max);
 
     // Convenience versions of 'toDimacs()':
     public native void toDimacs(@Cast("const char*") BytePointer file);
