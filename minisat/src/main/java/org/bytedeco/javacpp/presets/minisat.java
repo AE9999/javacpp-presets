@@ -52,13 +52,13 @@ public class minisat implements InfoMapper {
                 .put(new Info("Minisat::RegionAllocator<uint32_t>::Unit_Size",
                               "RegionAllocator<uint32_t>::Unit_Size")
                         .cppTypes("int")
-                )
+                ) // This conversion is needed bycause otherwise Unit_Size enum is wrongly generated.
                .put(new Info("Minisat::ClauseAllocator").pointerTypes("ClauseAllocatorPointer").define())
                .put(new Info("Minisat::ClauseAllocator::Unit_Size").javaNames("ClauseAllocatorUnitSize"))
-               .put(new Info("Minisat::ClauseAllocator::reloc").skip())
-
-               .put(new Info("Minisat::ClauseIterator").skip())
-               .put(new Info("Minisat::Clause").skip())
+               .put(new Info("Minisat::ClauseAllocator::reloc").skip()) // Does not convert nicely but is not nes.
+               //.put(new Info("Minisat::Clause").pointerTypes("ClausePointer").define())
+               .put(new Info("Minisat::Clause::mark").skip()) // Does not convert nicley but is not nes.
+               //.put(new Info("Minisat::ClauseIterator");
         ;
     }
 }
