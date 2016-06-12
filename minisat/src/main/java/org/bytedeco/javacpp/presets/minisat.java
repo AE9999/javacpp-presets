@@ -44,9 +44,19 @@ public class minisat implements InfoMapper {
                .put(new Info("Minisat::RegionAllocator<uint32_t>::Ref",
                              "RegionAllocator<uint32_t>::Ref",
                              "Minisat::Ref").cast().valueTypes("long").pointerTypes("long").define())
-               .put(new Info("Minisat::RegionAllocator<uint32_t>").pointerTypes("RegionAllocatorPointer"))
+               .put(new Info("Minisat::RegionAllocator<uint32_t>",
+                             "RegionAllocator<uint32_t>")
+                       .pointerTypes("RegionAllocatorPointer")
+                       .define()
+               )
+                .put(new Info("Minisat::RegionAllocator<uint32_t>::Unit_Size",
+                              "RegionAllocator<uint32_t>::Unit_Size")
+                        .cppTypes("int")
+                )
+               .put(new Info("Minisat::ClauseAllocator").pointerTypes("ClauseAllocatorPointer").define())
+               .put(new Info("Minisat::ClauseAllocator::Unit_Size").javaNames("ClauseAllocatorUnitSize"))
+
                .put(new Info("Minisat::ClauseIterator").skip())
-               .put(new Info("Minisat::ClauseAllocator").skip())
                .put(new Info("Minisat::Clause").skip())
         ;
     }
